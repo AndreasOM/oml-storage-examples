@@ -7,6 +7,10 @@ edition = "2021"
 path="src/simple_disk_u32_main.rs"
 name="simple_disk_u32"
 
+[[bin]]
+path="src/full_disk_u32_main.rs"
+name="full_disk_u32"
+
 [dependencies]
 color-eyre = "0.6.3"
 oml-storage = "0.2.1-alpha"

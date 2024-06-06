@@ -1,4 +1,4 @@
-use crate::simple_example::SimpleExample;
+use crate::full_example::FullExample;
 use crate::test_item::TestItem;
 use std::env;
 use std::path::Path;
@@ -8,7 +8,7 @@ use color_eyre::eyre::Result;
 use oml_storage::Storage;
 use oml_storage::StorageDisk;
 
-mod simple_example;
+mod full_example;
 mod test_item;
 
 #[tokio::main]
@@ -16,13 +16,13 @@ async fn main() -> Result<()> {
     setup_tracing();
     color_eyre::install()?;
 
-    tracing::info!("Example started - Simple Disk u32");
+    tracing::info!("Example started - Full Disk u32");
 
     let mut storage: Box<dyn Storage<TestItem>> = {
         let extension = Path::new("test_item");
         let mut path = env::current_dir()?;
         path.push("data");
-        path.push("simple_disk_u32");
+        path.push("full_disk_u32");
         path.push("test_items");
         tracing::debug!("Path {path:?} .{extension:?}");
 
@@ -34,7 +34,8 @@ async fn main() -> Result<()> {
 
     let storage = Arc::new(storage);
 
-    let mut example = SimpleExample::default();
+    let mut example = FullExample::default();
+    // example.set_delay_in_seconds( 15 ); // enable to observe
     example.run(storage.clone()).await?;
 
     tracing::info!("Example ended");
