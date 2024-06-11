@@ -11,13 +11,18 @@ name="simple_disk_u32"
 path="src/full_disk_u32_main.rs"
 name="full_disk_u32"
 
+[[bin]]
+path="src/simple_dynamodb_u32_main.rs"
+name="simple_dynamodb_u32"
+
 [dependencies]
 color-eyre = "0.6.3"
 nanoid = "0.4.0"
-oml-storage = "0.2.1-alpha"
+oml-storage = { version = "0.3.0-alpha" }
+# oml-storage = { version = "0.3.0-dev", path="../oml-storage" }
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.117"
-tokio = "1.38.0"
+tokio = { version = "1.38.0", features = [] }
 tracing = "0.1.40"
 tracing-error = "0.2.0"
 tracing-subscriber = "0.3.18"
