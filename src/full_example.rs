@@ -162,7 +162,7 @@ impl FullExample {
 
         let item_id = TestItem::generate_next_id(Some(&1001));
         if storage.exists(&item_id).await? {
-            tracing::warn!("{item_id} should not exit - aborting example");
+            tracing::warn!("{item_id} should not exist - aborting example");
             return Err(eyre!("example failed"));
         }
         let (lock, mut item) = storage.lock(&item_id, &us).await?.success()?;
@@ -176,12 +176,12 @@ impl FullExample {
         // force collision
         let item_id = TestItem::generate_next_id(Some(&1001));
         if !storage.exists(&item_id).await? {
-            tracing::warn!("{item_id} should exit - aborting example");
+            tracing::warn!("{item_id} should exist - aborting example");
             return Err(eyre!("example failed"));
         }
         let item_id = TestItem::generate_next_id(Some(&item_id));
         if storage.exists(&item_id).await? {
-            tracing::warn!("{item_id} should not exit - aborting example");
+            tracing::warn!("{item_id} should not exsit - aborting example");
             return Err(eyre!("example failed"));
         }
         let (lock, mut item) = storage.lock(&item_id, &us).await?.success()?;

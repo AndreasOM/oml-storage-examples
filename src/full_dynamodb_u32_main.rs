@@ -1,11 +1,11 @@
-use crate::simple_example::SimpleExample;
+use crate::full_example::FullExample;
 use crate::test_item::TestItem;
 use color_eyre::eyre::Result;
 use oml_storage::Storage;
 use oml_storage::StorageDynamoDb;
 use std::sync::Arc;
 
-mod simple_example;
+mod full_example;
 mod test_item;
 
 #[tokio::main]
@@ -15,7 +15,7 @@ async fn main() -> Result<()> {
 
     let random_name = nanoid::nanoid!();
 
-    tracing::info!("Example started - Simple DynamoDb u32 - {random_name}");
+    tracing::info!("Example started - Full DynamoDb u32 - {random_name}");
 
     let mut storage: Box<dyn Storage<TestItem>> = {
         //let storage = StorageDynamoDb::<TestItem>::new(&random_name).await;
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
 
     let storage = Arc::new(storage);
 
-    let mut example = SimpleExample::default();
+    let mut example = FullExample::default();
     example.run(storage.clone()).await?;
 
     tracing::info!("Example ended");

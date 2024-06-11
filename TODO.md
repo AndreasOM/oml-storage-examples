@@ -2,8 +2,6 @@
 
 ## InProgress
 
-- [ ] Create a full example
-
 ## ToDo
 - [ ] Factor out common code from examples
 
@@ -12,5 +10,6 @@
 ## 2024-06-11
 - [x] Use random folder name for full disk test
 - [x] Add simple DynamoDb example
+- [x] Add full DynamoDb example
 
 ## Released
