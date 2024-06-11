@@ -9,4 +9,7 @@
 
 ## Done
 
+## 2024-06-11
+- [x] Use random folder name for full disk test
+
 ## Released

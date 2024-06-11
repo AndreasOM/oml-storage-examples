@@ -16,13 +16,16 @@ async fn main() -> Result<()> {
     setup_tracing();
     color_eyre::install()?;
 
-    tracing::info!("Example started - Full Disk u32");
+    let random_folder_name = nanoid::nanoid!();
+
+    tracing::info!("Example started - Full Disk u32 - {random_folder_name}");
 
     let mut storage: Box<dyn Storage<TestItem>> = {
         let extension = Path::new("test_item");
         let mut path = env::current_dir()?;
         path.push("data");
         path.push("full_disk_u32");
+        path.push(random_folder_name);
         path.push("test_items");
         tracing::debug!("Path {path:?} .{extension:?}");
 
