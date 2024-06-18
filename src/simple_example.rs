@@ -11,6 +11,7 @@ pub struct SimpleExample {}
 impl SimpleExample {
     pub async fn run(&mut self, storage: Arc<Box<dyn Storage<TestItem>>>) -> Result<()> {
         let item_id = TestItem::generate_next_id(None);
+
         let (lock, mut item) = storage.lock(&item_id, "OWNER_ID").await?.success()?;
         tracing::info!("Item lock {lock:?}");
         item.increment_counter();
