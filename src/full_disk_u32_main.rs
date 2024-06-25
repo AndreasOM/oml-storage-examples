@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
         let mut path = env::current_dir()?;
         path.push("data");
         path.push("full_disk_u32");
-        path.push(random_folder_name);
+        // path.push(random_folder_name);
         path.push("test_items");
         tracing::debug!("Path {path:?} .{extension:?}");
 

@@ -24,6 +24,9 @@ impl FullExample {
 
         let us = "example_node_id_of_us";
 
+        // clean up from previous runs
+        storage.wipe("Yes, I know what I am doing!").await?;
+
         // --= Scenario: Login/Signup =--
         // user signs up with external ID, e.g. device identifier, or email, or....
         let external_id = 42;
@@ -219,6 +222,10 @@ impl FullExample {
                 break;
             }
         }
+
+        let highest_id = storage.metadata_highest_seen_id().await;
+        tracing::info!("Highest seen ID: {highest_id:?}");
+
         Ok(())
     }
 }
