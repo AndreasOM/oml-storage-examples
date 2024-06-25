@@ -188,18 +188,25 @@ impl FullExample {
 
         // show me the lock, expecting one
         let lock_debug = storage.display_lock(&item_id).await?;
-        tracing::info!("Lock -> '{lock_debug}'");
+        tracing::info!("Lock 🔐 -> '{lock_debug}'");
 
         item.increment_counter();
         let data = item.data();
         tracing::info!("Data: '{data}'");
         item.set_data("some data");
         storage.save(&item_id, &item, &lock).await?;
+
+        let lock_is_valid = storage.verify_lock( &item_id, &lock ).await?;
+        tracing::info!("Is lock valid? {lock_is_valid}");
+        let lock_invalid = oml_storage::StorageLock::new( "invalid" );
+        let lock_is_valid = storage.verify_lock( &item_id, &lock_invalid ).await?;
+        tracing::info!("Is invalid lock valid? {lock_is_valid}");
+
         storage.unlock(&item_id, lock).await?;
 
         // show me the lock, expecting none
         let lock_debug = storage.display_lock(&item_id).await?;
-        tracing::info!("Lock -> '{lock_debug}'");
+        tracing::info!("Lock 🔏 -> '{lock_debug}'");
 
         // scan all
         let mut scan_pos: Option<String> = None;
