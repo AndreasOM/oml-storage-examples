@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
     let mut storage: Box<dyn Storage<TestItem>> = {
         //let storage = StorageDynamoDb::<TestItem>::new(&random_name).await;
         let table_name = "test_items";
-        let mut storage = StorageDynamoDb::<TestItem>::new(&table_name).await;
+        let mut storage = StorageDynamoDb::<TestItem>::new(table_name).await;
         storage.set_endpoint_url("http://localhost:8000")?;
 
         Box::new(storage)
