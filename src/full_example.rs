@@ -1,6 +1,7 @@
 use crate::TestItem;
 use color_eyre::eyre::eyre;
 use color_eyre::Result;
+use oml_storage::LockNewResult;
 use oml_storage::LockResult;
 use oml_storage::StorageItem;
 use std::sync::Arc;
@@ -29,12 +30,17 @@ impl FullExample {
 
         // --= Scenario: Login/Signup =--
         // user signs up with external ID, e.g. device identifier, or email, or....
+        tracing::info!("--= Scenario: Login/Signup =--");
         let external_id = 42;
         let external_secret = "forty_two";
-        let (lock, mut item) = match storage.lock(&external_id, &us).await? {
-            LockResult::Success { lock, item } => (lock, item),
-            LockResult::AlreadyLocked { who } => {
+        let (lock, mut item) = match storage.lock_new(&external_id, &us).await? {
+            LockNewResult::Success { lock, item } => (lock, item),
+            LockNewResult::AlreadyLocked { who } => {
                 tracing::warn!("{external_id} should not be locked by {who} - aborting example");
+                return Err(eyre!("example failed"));
+            }
+            LockNewResult::AlreadyExists => {
+                tracing::warn!("{external_id} should not exist - aborting example");
                 return Err(eyre!("example failed"));
             }
         };
@@ -52,6 +58,29 @@ impl FullExample {
         storage.save(&external_id, &item, &lock).await?;
         storage.unlock(&external_id, lock).await?;
         // send reponse to caller
+
+        // --= Scenario: We accidentally create an ID collision =--
+        //
+        tracing::info!("--= Scenario: We accidentally create an ID collision =--");
+        // reuse the same ID!
+        // let external_id = 42;
+        tracing::warn!("Warning about existing item {external_id} expected:");
+        match storage.lock_new(&external_id, &us).await? {
+            LockNewResult::Success {
+                lock: _lock,
+                item: _item,
+            } => {
+                tracing::warn!("Expected Collision, but got successfor {external_id}");
+                return Err(eyre!("example failed"));
+            }
+            LockNewResult::AlreadyLocked { who } => {
+                tracing::warn!("{external_id} should not be locked by {who} - aborting example");
+                return Err(eyre!("example failed"));
+            }
+            LockNewResult::AlreadyExists => {
+                tracing::info!("Expected Collision for {external_id} -- all good!");
+            }
+        };
 
         // --= Scenario: User returns to modify their data =--
         //
@@ -199,10 +228,10 @@ impl FullExample {
         item.set_data("some data");
         storage.save(&item_id, &item, &lock).await?;
 
-        let lock_is_valid = storage.verify_lock( &item_id, &lock ).await?;
+        let lock_is_valid = storage.verify_lock(&item_id, &lock).await?;
         tracing::info!("Is lock valid? {lock_is_valid}");
-        let lock_invalid = oml_storage::StorageLock::new( "invalid" );
-        let lock_is_valid = storage.verify_lock( &item_id, &lock_invalid ).await?;
+        let lock_invalid = oml_storage::StorageLock::new("invalid");
+        let lock_is_valid = storage.verify_lock(&item_id, &lock_invalid).await?;
         tracing::info!("Is invalid lock valid? {lock_is_valid}");
 
         storage.unlock(&item_id, lock).await?;
