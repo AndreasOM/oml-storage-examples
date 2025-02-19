@@ -33,7 +33,7 @@ impl FullExample {
         tracing::info!("--= Scenario: Login/Signup =--");
         let external_id = 42;
         let external_secret = "forty_two";
-        let (lock, mut item) = match storage.lock_new(&external_id, &us).await? {
+        let (lock, mut item) = match storage.lock_new(&external_id, us).await? {
             LockNewResult::Success { lock, item } => (lock, item),
             LockNewResult::AlreadyLocked { who } => {
                 tracing::warn!("{external_id} should not be locked by {who} - aborting example");
@@ -53,7 +53,7 @@ impl FullExample {
         } else {
             // new login, hash, and store
             tracing::info!("New item for {external_id} <- {external_secret}");
-            item.set_secret(&external_secret);
+            item.set_secret(external_secret);
         }
         storage.save(&external_id, &item, &lock).await?;
         storage.unlock(&external_id, lock).await?;
@@ -65,7 +65,7 @@ impl FullExample {
         // reuse the same ID!
         // let external_id = 42;
         tracing::warn!("Warning about existing item {external_id} expected:");
-        match storage.lock_new(&external_id, &us).await? {
+        match storage.lock_new(&external_id, us).await? {
             LockNewResult::Success {
                 lock: _lock,
                 item: _item,
@@ -85,7 +85,7 @@ impl FullExample {
         // --= Scenario: User returns to modify their data =--
         //
         let external_id = 42;
-        let (lock, mut item) = match storage.lock(&external_id, &us).await? {
+        let (lock, mut item) = match storage.lock(&external_id, us).await? {
             LockResult::Success { lock, item } => (lock, item),
             LockResult::AlreadyLocked { who } => {
                 tracing::warn!("{external_id} should not be locked by {who} - aborting example");
@@ -103,7 +103,7 @@ impl FullExample {
         // --= Scenario: User returns to modify their data from two different browsers =--
         //
         let external_id = 42;
-        let (lock, mut item) = match storage.lock(&external_id, &us).await? {
+        let (lock, mut item) = match storage.lock(&external_id, us).await? {
             LockResult::Success { lock, item } => (lock, item),
             LockResult::AlreadyLocked { who } => {
                 tracing::warn!("{external_id} should not be locked by {who} - aborting example");
@@ -116,7 +116,7 @@ impl FullExample {
         item.increment_counter();
 
         // while we are working, the second request arrives
-        match storage.lock(&external_id, &us).await? {
+        match storage.lock(&external_id, us).await? {
             LockResult::Success { lock: _, item: _ } => {
                 tracing::warn!("{external_id} should be locked - aborting example");
                 return Err(eyre!("example failed"));
@@ -133,7 +133,7 @@ impl FullExample {
 
         // second caller tries again later
         let external_id = 42;
-        let (lock, mut item) = match storage.lock(&external_id, &us).await? {
+        let (lock, mut item) = match storage.lock(&external_id, us).await? {
             LockResult::Success { lock, item } => (lock, item),
             LockResult::AlreadyLocked { who } => {
                 tracing::warn!("{external_id} should not be locked by {who} - aborting example");
@@ -151,7 +151,7 @@ impl FullExample {
         // --= Scenario: Admin cleans up after crash, and force unlocks "stale" locks =--
 
         let external_id = 42;
-        let (lock, item) = match storage.lock(&external_id, &us).await? {
+        let (lock, item) = match storage.lock(&external_id, us).await? {
             LockResult::Success { lock, item } => (lock, item),
             LockResult::AlreadyLocked { who } => {
                 tracing::warn!("{external_id} should not be locked by {who} - aborting example");
@@ -169,7 +169,7 @@ impl FullExample {
 
         // user comes back, everything fine
         let external_id = 42;
-        let (lock, _item) = match storage.lock(&external_id, &us).await? {
+        let (lock, _item) = match storage.lock(&external_id, us).await? {
             LockResult::Success { lock, item } => (lock, item),
             LockResult::AlreadyLocked { who } => {
                 tracing::warn!("{external_id} should not be locked by {who} - aborting example");
@@ -181,7 +181,7 @@ impl FullExample {
         // --= Scenario: Autogenerate "random" IDs - no collision =--
 
         let item_id = TestItem::generate_next_id(None);
-        let (lock, mut item) = storage.lock(&item_id, &us).await?.success()?;
+        let (lock, mut item) = storage.lock(&item_id, us).await?.success()?;
         item.increment_counter();
         let data = item.data();
         tracing::info!("Data: '{data}'");
@@ -197,7 +197,7 @@ impl FullExample {
             tracing::warn!("{item_id} should not exist - aborting example");
             return Err(eyre!("example failed"));
         }
-        let (lock, mut item) = storage.lock(&item_id, &us).await?.success()?;
+        let (lock, mut item) = storage.lock(&item_id, us).await?.success()?;
         item.increment_counter();
         let data = item.data();
         tracing::info!("Data: '{data}'");
@@ -216,7 +216,7 @@ impl FullExample {
             tracing::warn!("{item_id} should not exsit - aborting example");
             return Err(eyre!("example failed"));
         }
-        let (lock, mut item) = storage.lock(&item_id, &us).await?.success()?;
+        let (lock, mut item) = storage.lock(&item_id, us).await?.success()?;
 
         // show me the lock, expecting one
         let lock_debug = storage.display_lock(&item_id).await?;

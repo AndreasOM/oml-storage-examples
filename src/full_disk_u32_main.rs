@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
         path.push("test_items");
         tracing::debug!("Path {path:?} .{extension:?}");
 
-        let storage = StorageDisk::<TestItem>::new(&path, &extension).await;
+        let storage = StorageDisk::<TestItem>::new(&path, extension).await;
         Box::new(storage)
     };
 

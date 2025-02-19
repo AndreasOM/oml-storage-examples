@@ -44,12 +44,12 @@ impl TestItem {
         a_previous_id: Option<&<TestItem as StorageItem>::ID>,
     ) -> <TestItem as StorageItem>::ID {
         tracing::info!("generate_next_id_u32 {a_previous_id:?}");
-        let id = if let Some(a_previous_id) = a_previous_id {
+        
+        if let Some(a_previous_id) = a_previous_id {
             a_previous_id + 1
         } else {
             1
-        };
-        id
+        }
     }
 }
 
@@ -65,7 +65,7 @@ impl StorageItem for TestItem {
     where
         Self: Sized,
     {
-        let i = serde_json::from_slice(&data)?;
+        let i = serde_json::from_slice(data)?;
 
         Ok(i)
     }
