@@ -3,6 +3,7 @@ use color_eyre::eyre::eyre;
 use color_eyre::Result;
 use oml_storage::LockNewResult;
 use oml_storage::LockResult;
+use oml_storage::SequentialId;
 use oml_storage::StorageItem;
 use std::sync::Arc;
 
@@ -31,7 +32,7 @@ impl FullExample {
         // --= Scenario: Login/Signup =--
         // user signs up with external ID, e.g. device identifier, or email, or....
         tracing::info!("--= Scenario: Login/Signup =--");
-        let external_id = 42;
+        let external_id = SequentialId::new(42);
         let external_secret = "forty_two";
         let (lock, mut item) = match storage.lock_new(&external_id, us).await? {
             LockNewResult::Success { lock, item } => (lock, item),
@@ -84,7 +85,7 @@ impl FullExample {
 
         // --= Scenario: User returns to modify their data =--
         //
-        let external_id = 42;
+        let external_id = SequentialId::new(42);
         let (lock, mut item) = match storage.lock(&external_id, us).await? {
             LockResult::Success { lock, item } => (lock, item),
             LockResult::AlreadyLocked { who } => {
@@ -102,7 +103,7 @@ impl FullExample {
 
         // --= Scenario: User returns to modify their data from two different browsers =--
         //
-        let external_id = 42;
+        let external_id = SequentialId::new(42);
         let (lock, mut item) = match storage.lock(&external_id, us).await? {
             LockResult::Success { lock, item } => (lock, item),
             LockResult::AlreadyLocked { who } => {
@@ -132,7 +133,7 @@ impl FullExample {
         // send reponse to caller
 
         // second caller tries again later
-        let external_id = 42;
+        let external_id = SequentialId::new(42);
         let (lock, mut item) = match storage.lock(&external_id, us).await? {
             LockResult::Success { lock, item } => (lock, item),
             LockResult::AlreadyLocked { who } => {
@@ -150,7 +151,7 @@ impl FullExample {
 
         // --= Scenario: Admin cleans up after crash, and force unlocks "stale" locks =--
 
-        let external_id = 42;
+        let external_id = SequentialId::new(42);
         let (lock, item) = match storage.lock(&external_id, us).await? {
             LockResult::Success { lock, item } => (lock, item),
             LockResult::AlreadyLocked { who } => {
@@ -168,7 +169,7 @@ impl FullExample {
         std::thread::sleep(delay);
 
         // user comes back, everything fine
-        let external_id = 42;
+        let external_id = SequentialId::new(42);
         let (lock, _item) = match storage.lock(&external_id, us).await? {
             LockResult::Success { lock, item } => (lock, item),
             LockResult::AlreadyLocked { who } => {
@@ -192,7 +193,7 @@ impl FullExample {
         // --= Scenario: Autogenerate "random" IDs - collision =--
         // :TODO: these scenarios are actually more complex
 
-        let item_id = TestItem::generate_next_id(Some(&1001));
+        let item_id = TestItem::generate_next_id(Some(&SequentialId::new(1001)));
         if storage.exists(&item_id).await? {
             tracing::warn!("{item_id} should not exist - aborting example");
             return Err(eyre!("example failed"));
@@ -206,7 +207,7 @@ impl FullExample {
         storage.unlock(&item_id, lock).await?;
 
         // force collision
-        let item_id = TestItem::generate_next_id(Some(&1001));
+        let item_id = TestItem::generate_next_id(Some(&SequentialId::new(1001)));
         if !storage.exists(&item_id).await? {
             tracing::warn!("{item_id} should exist - aborting example");
             return Err(eyre!("example failed"));

@@ -1,4 +1,6 @@
 use color_eyre::Result;
+use oml_storage::SequentialId;
+use oml_storage::StorageId;
 use oml_storage::StorageItem;
 use serde::Deserialize;
 use serde::Serialize;
@@ -45,16 +47,13 @@ impl TestItem {
     ) -> <TestItem as StorageItem>::ID {
         tracing::info!("generate_next_id_u32 {a_previous_id:?}");
         
-        if let Some(a_previous_id) = a_previous_id {
-            a_previous_id + 1
-        } else {
-            1
-        }
+        // Now delegates to the SequentialId implementation
+        SequentialId::generate_new(a_previous_id)
     }
 }
 
 impl StorageItem for TestItem {
-    type ID = u32;
+    type ID = SequentialId;
 
     fn serialize(&self) -> Result<Vec<u8>> {
         let json = serde_json::to_string_pretty(&self)?;
@@ -69,11 +68,12 @@ impl StorageItem for TestItem {
 
         Ok(i)
     }
+    
     fn generate_next_id(a_previous_id: Option<&Self::ID>) -> Self::ID {
         Self::generate_next_id_u32(a_previous_id)
     }
+    
     fn make_id(id: &str) -> Result<Self::ID> {
-        let id = id.parse::<Self::ID>()?;
-        Ok(id)
+        SequentialId::from_string(id)
     }
 }
